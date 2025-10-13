@@ -1,0 +1,65 @@
+# =====================
+# Global ignores
+# =====================
+.DS_Store
+*.log
+*.tmp
+*.bak
+*.swp
+*.pyc
+__pycache__/
+
+# =====================
+# Node / Vite Frontend
+# =====================
+node_modules/
+dist/
+.env
+.env.local
+.env.development
+.env.production
+coverage/
+.vscode/
+.cache/
+vite.config.ts.timestamp*
+
+# =====================
+# Python environment
+# =====================
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+*.egg-info/
+*.sqlite3
+__pycache__/
+
+# =====================
+# Data files / outputs
+# =====================
+*.tif
+*.zip
+*.nc
+*.csv
+*.geojson
+*.shp
+*.dbf
+*.prj
+*.shx
+*.json
+*.h5
+*.parquet
+*.npy
+*.npz
+data/
+tmp/
+output/
+exports/
+
+# =====================
+# OS / Editor junk
+# =====================
+Thumbs.db
+ehthumbs.db
+.idea/
+.vscode/
