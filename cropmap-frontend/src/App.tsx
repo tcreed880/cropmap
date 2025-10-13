@@ -43,7 +43,7 @@ const CROP_MAP: Record<number, string> = {
   53: "Peas"
 };
 
-const MAP_STYLE = "/cropmap/assets/map_style_dark.json"; // loaded from /public
+const MAP_STYLE = "assets/map_style_dark.json"; // loaded from /public
 
 export default function App() {
   const mapContainer = useRef<HTMLDivElement | null>(null);
@@ -68,7 +68,7 @@ export default function App() {
   // ---- Load hex data ----
   useEffect(() => {
     async function fetchData() {
-      const csv: any = await load("/cropmap/data/pulses_conus_2008_2023_ha.csv", CSVLoader);
+      const csv: any = await load("data/pulses_conus_2008_2023_ha.csv", CSVLoader);
       const parsed: CropDatum[] = csv.data.map((d: any) => ({
         crop_id: parseInt(d.crop_id),
         area_ha: parseFloat(d.area_ha || 0),
@@ -113,7 +113,7 @@ export default function App() {
   useEffect(() => {
     async function fetchTotals() {
       try {
-        const csv: any = await load("/cropmap/data/crop_totals.csv", CSVLoader);
+        const csv: any = await load("data/crop_totals.csv", CSVLoader);
         const parsed: CropTotal[] = csv.data.map((d: any) => ({
           crop_id: parseInt(d.crop_id),
           year: parseInt(d.year),
