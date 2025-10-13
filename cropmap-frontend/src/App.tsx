@@ -54,8 +54,9 @@ export default function App() {
   const [filteredData, setFilteredData] = useState<CropDatum[]>([]);
   const [totals, setTotals] = useState<CropTotal[]>([]);
   const [colorScale, setColorScale] = useState<(v: number) => [number, number, number, number]>(
-    () => () => [0, 0, 0, 255]
+    () => (v: number) => [0, 0, 0, 255] as [number, number, number, number]
   );
+
   const [tooltip, setTooltip] = useState<{x: number; y: number; html: string} | null>(null);
 
   const [selectedCrop, setSelectedCrop] = useState<number>(42);
