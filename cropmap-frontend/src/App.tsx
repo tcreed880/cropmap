@@ -342,17 +342,28 @@ export default function App() {
           left: 15,
           background: "rgba(0,0,0,0.7)",
           color: "white",
-          padding: "12px 14px",
+          padding: "10px 14px",
           borderRadius: "8px",
           fontSize: "14px",
           display: "flex",
           flexDirection: "column",
           gap: "10px",
-          width: "240px",
-          fontFamily: "sans-serif"
+          width: "220px",
         }}
       >
-        {/* Crop selector */}
+        {/* Title */}
+        <div
+          style={{
+            fontSize: "16px",
+            fontWeight: 600,
+            textAlign: "center",
+            marginBottom: "-8px",
+            letterSpacing: "0.3px",
+          }}
+        >
+          US Pulse Crop Area
+        </div>
+
         <label>
           Crop:
           <select
@@ -365,7 +376,7 @@ export default function App() {
               color: "white",
               border: "1px solid #444",
               borderRadius: "4px",
-              padding: "4px 6px"
+              padding: "4px 6px",
             }}
           >
             {Object.entries(CROP_MAP).map(([id, name]) => (
@@ -444,6 +455,8 @@ export default function App() {
 
           Crop area data sourced from USDA NASS Cropland Data Layer. CDL is produced from satellite imagery and extensive ground
           truth data. While CDL data align with harvest year, the map is more representative of what was planted. <br/><br/>
+          *Chickpea CDL map data partially missing pre-2019, total hectares data is valid<br/><br/>
+          <em>Area</em> = Total area (in hectares) classified as the given crop within the hex area. <br/><br/>
           <em>Confidence</em> = Mean per-pixel predicted confidence of the given classification over the hex area. <br/><br/>
           Precipitation data sourced from USFS Historical Annual Precipitation (1975-2005) image layer. <br/><br/>
           Total hectares harvested (line plot) data sourced from USDA NASS Quick Stats.
@@ -513,6 +526,7 @@ export default function App() {
                 dataKey="total_ha"
                 stroke="#42f5e6"
                 strokeWidth={2}
+                isAnimationActive={false}  // 👈 add this line
                 dot={({ cx, cy, payload }) => {
                   const isActive = payload.year === selectedYear;
                   return (
