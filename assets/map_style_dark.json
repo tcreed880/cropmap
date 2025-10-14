@@ -1,0 +1,102 @@
+{
+  "version": 8,
+  "name": "Dark Matter (Deep Blue Land + Ocean Contrast - Enhanced Borders)",
+  "metadata": { "maputnik:renderer": "mbgljs" },
+  "sources": {
+    "carto": {
+      "type": "vector",
+      "url": "https://tiles.basemaps.cartocdn.com/vector/carto.streets/v1/tiles.json"
+    }
+  },
+  "sprite": "https://tiles.basemaps.cartocdn.com/gl/dark-matter-gl-style/sprite",
+  "glyphs": "https://tiles.basemaps.cartocdn.com/fonts/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#09101D"
+      }
+    },
+    {
+      "id": "water",
+      "type": "fill",
+      "source": "carto",
+      "source-layer": "water",
+      "paint": {
+        "fill-color": "#122330",
+        "fill-opacity": 0.95
+      }
+    },
+    {
+      "id": "landuse",
+      "type": "fill",
+      "source": "carto",
+      "source-layer": "landuse",
+      "paint": {
+        "fill-color": "#09101D",
+        "fill-opacity": 1
+      }
+    },
+    {
+      "id": "park_nature",
+      "type": "fill",
+      "source": "carto",
+      "source-layer": "park",
+      "filter": ["all", ["==", "class", "nature_reserve"]],
+      "paint": {
+        "fill-color": "#0A1424",
+        "fill-opacity": 0.9
+      }
+    },
+    {
+      "id": "boundary_state",
+      "type": "line",
+      "source": "carto",
+      "source-layer": "boundary",
+      "minzoom": 4,
+      "filter": ["all", ["==", "admin_level", 4], ["==", "maritime", 0]],
+      "paint": {
+        "line-color": {
+          "stops": [
+            [4, "rgba(230,230,240,0.65)"],
+            [6, "rgba(240,240,250,0.7)"],
+            [9, "rgba(255,255,255,0.8)"]
+          ]
+        },
+        "line-width": { "stops": [[4, 1.0], [7, 1.6], [9, 2.2]] },
+        "line-opacity": 0.7
+      }
+    },
+    {
+      "id": "boundary_country",
+      "type": "line",
+      "source": "carto",
+      "source-layer": "boundary",
+      "minzoom": 0,
+      "filter": ["all", ["==", "admin_level", 2], ["==", "maritime", 0]],
+      "paint": {
+        "line-color": {
+          "stops": [
+            [2, "rgba(230,230,240,0.65)"],
+            [5, "rgba(240,240,250,0.7)"],
+            [8, "rgba(255,255,255,0.8)"]
+          ]
+        },
+        "line-width": { "stops": [[3, 1.2], [6, 1.8], [9, 2.4]] },
+        "line-opacity": 0.7
+      }
+    },
+    {
+      "id": "boundary_maritime",
+      "type": "line",
+      "source": "carto",
+      "source-layer": "boundary",
+      "filter": ["all", ["==", "maritime", 1]],
+      "paint": {
+        "line-color": "rgba(70,80,100,0.4)",
+        "line-width": 0.8
+      }
+    }
+  ]
+}
