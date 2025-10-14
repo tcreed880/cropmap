@@ -66,6 +66,8 @@ export default function App() {
   const [yearRange, setYearRange] = useState<[number, number]>([2008, 2023]);
   const [isPlaying, setIsPlaying] = useState(false);
   const playInterval = useRef<NodeJS.Timeout | null>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const [showPrecip, setShowPrecip] = useState(false);
 
   // ---- Load hex data ----
   useEffect(() => {
@@ -143,29 +145,21 @@ export default function App() {
     const map = new maplibregl.Map({
       container: mapContainer.current,
       style: MAP_STYLE,
-      center: [-98.5, 39.5], // ✅ centered on CONUS
-      zoom: 4.0,
+      center: [-100.5, 39],
+      zoom: 4.1,
       pitch: 25,
       bearing: 0,
       attributionControl: false,
-      maxBounds: [
-        [-180, 5],
-        [-40, 83]
-      ],
+      maxBounds: [[-136, 22], [-58, 52]],
       minZoom: 3,
       maxZoom: 8
     });
+    mapRef.current = map;
 
     const deck = new Deck({
       canvas: deckCanvas.current,
       controller: true,
-      viewState: {
-        longitude: -98.5,
-        latitude: 39.5,
-        zoom: 4.0,
-        pitch: 25,
-        bearing: 0
-      },
+      viewState: { longitude: -100.5, latitude: 39, zoom: 4.1, pitch: 25, bearing: 0 },
       onViewStateChange: ({viewState}) => {
         map.jumpTo({
           center: [viewState.longitude, viewState.latitude],
@@ -175,9 +169,34 @@ export default function App() {
         });
       }
     });
-
     deckRef.current = deck;
 
+    // ✅ Add precip layer after map loads
+    map.on("load", () => {
+      if (!map.getSource("precip-static")) {
+        map.addSource("precip-static", {
+          type: "image",
+          url: "data/precip.png",
+          coordinates: [
+            [-128.25, 49.34], // top-left
+            [-63.94, 49.34],  // top-right
+            [-63.94, 24.1],  // bottom-right
+            [-128.25, 24.1]  // bottom-left
+          ]
+
+        });
+
+        map.addLayer({
+          id: "precip-layer",
+          type: "raster",
+          source: "precip-static",
+          paint: { "raster-opacity": 0.40 },
+          layout: { visibility: "none" }
+        });
+      }
+    });
+
+    // Keep DeckGL view synced with map
     map.on("move", () => {
       const center = map.getCenter();
       deck.setProps({
@@ -192,11 +211,21 @@ export default function App() {
     });
 
     map.on("remove", () => deck.finalize());
+
     return () => {
       map.remove();
       deck.finalize();
     };
   }, []);
+
+
+  // ---- Toggle precipitation layer visibility ----
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.getLayer("precip-layer")) return;
+    map.setLayoutProperty("precip-layer", "visibility", showPrecip ? "visible" : "none");
+  }, [showPrecip]);
+
 
   // ---- Update DeckGL layers ----
   useEffect(() => {
@@ -215,7 +244,7 @@ export default function App() {
             filled: true,
             stroked: false,
             pickable: true,
-            coverage: 0.7,
+            coverage: 0.75,
             material: {
               ambient: 0.4,
               diffuse: 0.7,
@@ -313,15 +342,17 @@ export default function App() {
           left: 15,
           background: "rgba(0,0,0,0.7)",
           color: "white",
-          padding: "10px 14px",
+          padding: "12px 14px",
           borderRadius: "8px",
           fontSize: "14px",
           display: "flex",
           flexDirection: "column",
           gap: "10px",
-          width: "220px"
+          width: "240px",
+          fontFamily: "sans-serif"
         }}
       >
+        {/* Crop selector */}
         <label>
           Crop:
           <select
@@ -345,10 +376,11 @@ export default function App() {
           </select>
         </label>
 
+        {/* Year slider + play/pause */}
         {yearRange && (
           <label>
             Year: <strong>{selectedYear}</strong>
-            <div style={{display: "flex", alignItems: "center", gap: "6px", marginTop: "6px"}}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "6px" }}>
               <input
                 type="range"
                 min={yearRange[0]}
@@ -356,7 +388,7 @@ export default function App() {
                 step={1}
                 value={selectedYear ?? yearRange[0]}
                 onChange={e => setSelectedYear(parseInt(e.target.value))}
-                style={{flexGrow: 1}}
+                style={{ flexGrow: 1 }}
               />
               <button
                 onClick={togglePlay}
@@ -374,7 +406,52 @@ export default function App() {
             </div>
           </label>
         )}
+
+        {/* Precip toggle */}
+        <label style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
+          <input
+            type="checkbox"
+            checked={showPrecip}
+            onChange={() => setShowPrecip(prev => !prev)}
+          />
+          Mean Annual Precip
+        </label>
+
+        {/* Collapsible Data Sources */}
+        <details
+          style={{
+            marginTop: "6px",
+            background: "rgba(20,20,20,0.8)",
+            borderRadius: "6px",
+            padding: "8px 10px",
+            fontSize: "10px",
+            lineHeight: "1.45",
+            color: "#ddd",
+            cursor: "pointer"
+          }}
+        >
+          <summary
+            style={{
+              color: "#f5f5f5",
+              fontWeight: 600,
+              fontSize: "12px",
+              marginBottom: "4px",
+              cursor: "pointer"
+            }}
+          >
+            Data sources
+          </summary>
+
+          Crop area data sourced from USDA NASS Cropland Data Layer. CDL is produced from satellite imagery and extensive ground
+          truth data. While CDL data align with harvest year, the map is more representative of what was planted. <br/><br/>
+          <em>Confidence</em> = Mean per-pixel predicted confidence of the given classification over the hex area. <br/><br/>
+          Precipitation data sourced from USFS Historical Annual Precipitation (1975-2005) image layer. <br/><br/>
+          Total hectares harvested (line plot) data sourced from USDA NASS Quick Stats.
+        </details>
       </div>
+
+
+      
 
       {/* Mini line chart */}
       {totals.length > 0 && (
@@ -408,18 +485,18 @@ export default function App() {
           <ResponsiveContainer width="100%" height="90%">
             <LineChart
               data={totals.filter(t => t.crop_id === selectedCrop)}
-              margin={{top: 5, right: 10, left: -30, bottom: 0}}
+              margin={{ top: 5, right: 10, left: -30, bottom: 0 }}
             >
               <CartesianGrid stroke="rgba(255,255,255,0.1)" vertical={false} />
               <XAxis
                 dataKey="year"
                 stroke="#aaa"
-                tick={{fill: "#ccc", fontSize: 10}}
+                tick={{ fill: "#ccc", fontSize: 10 }}
                 axisLine={false}
               />
               <YAxis
                 stroke="#aaa"
-                tick={{fill: "#ccc", fontSize: 10}}
+                tick={{ fill: "#ccc", fontSize: 10 }}
                 tickFormatter={v => `${(v / 1000).toFixed(0)}k`}
               />
               <ReTooltip
@@ -436,8 +513,7 @@ export default function App() {
                 dataKey="total_ha"
                 stroke="#42f5e6"
                 strokeWidth={2}
-                dot={({cx, cy, payload}) => {
-                  // Highlight dot if its year == selectedYear
+                dot={({ cx, cy, payload }) => {
                   const isActive = payload.year === selectedYear;
                   return (
                     <circle
@@ -450,12 +526,69 @@ export default function App() {
                     />
                   );
                 }}
-                activeDot={{r: 6}}
+                activeDot={{ r: 6 }}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
       )}
+
+      {/* Precip legend */}
+      {showPrecip && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: 15,
+            right: 15,
+            background: "rgba(0,0,0,0.7)",
+            color: "white",
+            padding: "10px 12px",
+            borderRadius: "8px",
+            fontSize: "11px",
+            textAlign: "center",
+            width: "200px",
+            fontFamily: "sans-serif",
+            boxShadow: "0 1px 6px rgba(0,0,0,0.45)"
+          }}
+        >
+          <div
+            style={{
+              fontSize: "12px",
+              fontWeight: 700,
+              marginBottom: "6px"
+            }}
+          >
+            Mean Annual Precipitation (mm)
+          </div>
+
+          {/* corrected color gradient */}
+          <div
+            style={{
+              height: "14px",
+              borderRadius: "3px",
+              background:
+                "linear-gradient(to right, #583125, #6A6B13, #4F6C11, #095B24, #0A1C42)"
+            }}
+          />
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: "4px",
+              fontSize: "10px",
+              color: "#ddd"
+            }}
+          >
+            <span>{"<100"}</span>
+            <span>350</span>
+            <span>750</span>
+            <span>950</span>
+            <span>1500+</span>
+          </div>
+        </div>
+      )}
+
 
     </div>
   );
