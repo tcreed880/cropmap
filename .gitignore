@@ -63,3 +63,12 @@ Thumbs.db
 ehthumbs.db
 .idea/
 .vscode/
+
+
+# =====================
+# Overrides for GitHub Pages build output
+# =====================
+!cropmap-frontend/public/data/
+!cropmap-frontend/public/assets/
+!cropmap-frontend/dist/data/
+!cropmap-frontend/dist/assets/
