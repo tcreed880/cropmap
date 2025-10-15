@@ -150,7 +150,7 @@ export default function App() {
       pitch: 30,
       bearing: 0,
       attributionControl: false,
-      maxBounds: [[-136, 22], [-58, 52]],
+      maxBounds: [[-139, 19], [-58, 55]],
       minZoom: 3,
       maxZoom: 8
     });
