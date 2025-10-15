@@ -147,7 +147,7 @@ export default function App() {
       style: MAP_STYLE,
       center: [-100.5, 39],
       zoom: 4.1,
-      pitch: 25,
+      pitch: 30,
       bearing: 0,
       attributionControl: false,
       maxBounds: [[-136, 22], [-58, 52]],
@@ -159,7 +159,7 @@ export default function App() {
     const deck = new Deck({
       canvas: deckCanvas.current,
       controller: true,
-      viewState: { longitude: -100.5, latitude: 39, zoom: 4.1, pitch: 25, bearing: 0 },
+      viewState: { longitude: -100.5, latitude: 39, zoom: 4.1, pitch: 30, bearing: 0 },
       onViewStateChange: ({viewState}) => {
         map.jumpTo({
           center: [viewState.longitude, viewState.latitude],
@@ -455,7 +455,7 @@ export default function App() {
 
           Crop area data sourced from USDA NASS Cropland Data Layer. CDL is produced from satellite imagery and extensive ground
           truth data. While CDL data align with harvest year, the map is more representative of what was planted. <br/><br/>
-          *Chickpea CDL map data partially missing pre-2019, total hectares data is valid<br/><br/>
+          *Chickpea map data is combined with Dry Beans pre-2019 (fix in progress), total hectares data is valid<br/><br/>
           <em>Area</em> = Total area (in hectares) classified as the given crop within the hex area. <br/><br/>
           <em>Confidence</em> = Mean per-pixel predicted confidence of the given classification over the hex area. <br/><br/>
           Precipitation data sourced from USFS Historical Annual Precipitation (1975-2005) image layer. <br/><br/>
